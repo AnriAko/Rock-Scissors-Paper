@@ -59,7 +59,7 @@ class Game {
 			this.checkOnZero(this.userMove);
 			return this.checkOnZero(this.userMove)
 		}
-		if(isNaN(this.userMove) || this.userMove==''){
+		if(isNaN(this.userMove) || this.userMove=='' || this.userMove<1 || this.userMove>this.args.length){
 			console.log(`Please choose number between 1 and ${this.args.length}`)
 			this.#toContinue();
 			return true;
