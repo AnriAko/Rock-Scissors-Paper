@@ -1,6 +1,6 @@
 const { GameRules } = require('./gameRules');
 const { GameRulesTable } = require('./gameRulesTable');
-const { Cipher } = require('./gameCipher');
+const { HMAC } = require('./gameHMAC');
 const readlineSync = require("readline-sync");
 const colors = require("colors");
 class Game {
@@ -9,9 +9,9 @@ class Game {
 		this.args = args;
 		this.continue = true;
 
-		this.hmac = new Cipher();
+		this.hmacKey = new HMAC();
 
-		this.hmacMessage = `HMAC: ${this.hmac.key}`.green;
+		this.hmacOriginMessage = `HMAC key: ${this.hmacKey.key}`.green;
 
 		this.availableMovesMessage = this.#generateMovesMessage(this.args);
 
@@ -22,11 +22,12 @@ class Game {
 	}
 	displayMenu() {
 		while (this.continue) {
-			console.log(this.hmacMessage);
-			console.log(this.availableMovesMessage);
 			this.makeMove();
-			this.hmacUpdated = this.hmac.calculateHMAC(this.pcMove);
-
+			this.hmacUpdated = this.hmacKey.calculateHMAC(this.pcMove);
+			this.hmacUpdatedMessage = `HMAC: ${this.hmacUpdated}`.green;
+			console.log(this.hmacUpdatedMessage);
+			console.log(this.availableMovesMessage);
+			
 			this.userMove = readlineSync.question(`Enter your move: `);
 			if (this.#inputHandler()){continue};
 
@@ -38,15 +39,15 @@ class Game {
 		console.log(`Computer move: ${this.args[this.pcMove]}`)
 		if (this.gameRulesMatrix.getRules()[this.pcMove][this.userMove - 1] == 1) {
 			console.log("You win!".yellow);
-			console.log(`HMAC key: ${this.hmacUpdated}`.green);
+			console.log(this.hmacOriginMessage);
 		}
 		else if(this.gameRulesMatrix.getRules()[this.pcMove][this.userMove - 1] == 0) {
 			console.log("Draw!");
-			console.log( `HMAC key: ${this.hmacUpdated}`.green);
+			console.log(this.hmacOriginMessage);
 		}
 		else if(this.gameRulesMatrix.getRules()[this.pcMove][this.userMove - 1] == -1){
 			console.log("You lose!".red);
-			console.log( `HMAC key: ${this.hmacUpdated}`.green);
+			console.log(this.hmacOriginMessage);
 		}
 		this.#toContinue();
 		}
@@ -60,8 +61,7 @@ class Game {
 			return this.checkOnZero(this.userMove)
 		}
 		if(isNaN(this.userMove) || this.userMove=='' || this.userMove<1 || this.userMove>this.args.length){
-			console.log(`Please choose number between 1 and ${this.args.length}`)
-			this.#toContinue();
+			console.log(`Please choose number between 1 and ${this.args.length} \n`)
 			return true;
 		}
 

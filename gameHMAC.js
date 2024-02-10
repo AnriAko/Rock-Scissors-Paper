@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-class Cipher {
+class HMAC {
 	constructor() {
 		this.key = crypto.randomBytes(32).toString('hex');
 	}
@@ -10,4 +10,4 @@ class Cipher {
 		return hmac.digest('hex');
 	}
 }
-module.exports = { Cipher };
+module.exports = { HMAC };
